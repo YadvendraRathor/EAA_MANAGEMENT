@@ -7,12 +7,12 @@ import CryptoJS from 'crypto-js';
 const { Sider, Content } = Layout;
 
 // Get your secret key from environment variables
-const NOTES_AES_SECRET_KEY = import.meta.env.VITE_MATERIALS_AES_SECRET_KEY;
+const SYLLABUS_AES_SECRET_KEY = import.meta.env.VITE_MATERIALS_AES_SECRET_KEY;
 
 // Encryption function for text fields
 const encryptAES = (plainText: string): string => {
   try {
-    const key = CryptoJS.enc.Utf8.parse(NOTES_AES_SECRET_KEY);
+    const key = CryptoJS.enc.Utf8.parse(SYLLABUS_AES_SECRET_KEY);
     const encrypted = CryptoJS.AES.encrypt(plainText, key, {
       mode: CryptoJS.mode.ECB,
       padding: CryptoJS.pad.Pkcs7,
@@ -24,13 +24,13 @@ const encryptAES = (plainText: string): string => {
   }
 };
 
-interface BranchNotes {
+interface BranchSyllabus {
   branch: string;
-  notes: { [noteId: string]: any };
+  syllabus: { [noteId: string]: any };
 }
 
-const SecondYearNotes: React.FC = () => {
-  const [branches, setBranches] = useState<BranchNotes[]>([]);
+const FourthYearSyllabus: React.FC = () => {
+  const [branches, setBranches] = useState<BranchSyllabus[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   // Modal state for adding a new branch/subject note (two-step modal)
@@ -46,13 +46,13 @@ const SecondYearNotes: React.FC = () => {
 
   // Listen for branches at the specified path
   useEffect(() => {
-    const notesRef = dbRef(db, 'version12/Materials/Notes/Second_Year');
-    const unsubscribe = onValue(notesRef, (snapshot) => {
+    const syllabusRef = dbRef(db, 'version12/Materials/Syllabus/Fourth_Year');
+    const unsubscribe = onValue(syllabusRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const branchList: BranchNotes[] = Object.keys(data).map((branch) => ({
+        const branchList: BranchSyllabus[] = Object.keys(data).map((branch) => ({
           branch,
-          notes: data[branch],
+          syllabus: data[branch],
         }));
         setBranches(branchList);
         if (branchList.length > 0 && !selectedBranch) {
@@ -97,8 +97,8 @@ const SecondYearNotes: React.FC = () => {
     const encryptedSubCode = encryptAES(sub_code);
     const encryptedSubName = encryptAES(sub_name);
     const encryptedBy = encryptAES(by);
-    // The path for the new subject will be: version12/Materials/Notes/Second_Year/<newBranchName>
-    const branchPath = `version12/Materials/Notes/Second_Year/${newBranchName}`;
+    // The path for the new subject will be: version12/Materials/Syllabus/Fourth_Year/<newBranchName>
+    const branchPath = `version12/Materials/Syllabus/Fourth_Year/${newBranchName}`;
     const newSubjectRef = push(dbRef(db, branchPath));
     const newSubjectId = newSubjectRef.key;
     const subjectData = {
@@ -154,7 +154,7 @@ const SecondYearNotes: React.FC = () => {
     const encryptedSubCode = encryptAES(sub_code);
     const encryptedSubName = encryptAES(sub_name);
     const encryptedBy = encryptAES(by);
-    const branchPath = `version12/Materials/Notes/Second_Year/${selectedBranch}`;
+    const branchPath = `version12/Materials/Syllabus/Fourth_Year/${selectedBranch}`;
     const newNoteRef = push(dbRef(db, branchPath));
     const newNoteId = newNoteRef.key;
     const noteData = {
@@ -188,45 +188,6 @@ const SecondYearNotes: React.FC = () => {
   return (
     <Layout style={{ minHeight: '70vh' }}>
       <Sider width={250} style={{ background: '#fff', paddingBottom: '24px' }}>
-<<<<<<< HEAD
-        {loading ? (
-          <Spin style={{ margin: '20px' }} />
-        ) : (
-          <>
-            <Menu
-              mode="inline"
-              selectedKeys={[selectedBranch]}
-              onClick={handleMenuClick}
-              style={{ height: 'calc(100% - 50px)', borderRight: 0 }}
-            >
-              {branches.map((branchObj) => (
-                <Menu.Item key={branchObj.branch}>{branchObj.branch}</Menu.Item>
-              ))}
-            </Menu>
-            <Button
-              type="dashed"
-              style={{ width: '90%', margin: '10px' }}
-              onClick={() => {
-                setShowAddSubjectModal(true);
-                setModalStep(1);
-              }}
-            >
-              Add Branch
-            </Button>
-          </>
-        )}
-      </Sider>
-      <Layout style={{ padding: '24px' }}>
-        <Content style={{ background: '#fff', padding: 24, minHeight: 280 }}>
-        <div className="text-left mb-7">
-              <h2 className="text-2xl font-semibold">Data Entry</h2>
-              <p className="text-sm text-gray-500">
-                  Note: The Content will be added in 2nd Year (<span className="font-medium text-gray-500">{selectedBranch}</span>)
-              </p>
-        </div>
-
-          <Form form={subjectForm} layout="vertical" onFinish={onFinishSubject}>
-=======
         {/* Sidebar code remains unchanged */}
         {/* For brevity, assume the sidebar remains the same as in your current code */}
         <Spin spinning={loading} style={{ margin: '20px' }}>
@@ -268,7 +229,6 @@ const SecondYearNotes: React.FC = () => {
             >
               <Input placeholder="Enter author name" />
             </Form.Item>
->>>>>>> upstream/main
             <Form.Item
               label="PDF Link"
               name="pdf"
@@ -283,7 +243,7 @@ const SecondYearNotes: React.FC = () => {
             >
               <Input placeholder="Enter subject code" />
             </Form.Item>
-            <Form.Item className='mb-10'
+            <Form.Item
               label="Subject Name"
               name="sub_name"
               rules={[{ required: true, message: 'Please enter the subject name' }]}
@@ -382,4 +342,4 @@ const SecondYearNotes: React.FC = () => {
   );
 };
 
-export default SecondYearNotes;
+export default FourthYearSyllabus;

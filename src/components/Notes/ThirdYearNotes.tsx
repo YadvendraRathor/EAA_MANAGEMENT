@@ -7,9 +7,9 @@ import CryptoJS from 'crypto-js';
 const { Sider, Content } = Layout;
 
 // Get your secret key from environment variables
-const NOTES_AES_SECRET_KEY = import.meta.env.VITE_NOTES_AES_SECRET_KEY;
+const NOTES_AES_SECRET_KEY = import.meta.env.VITE_MATERIALS_AES_SECRET_KEY;
 
-// Encryption function for PDF link
+// Encryption function for text fields
 const encryptAES = (plainText: string): string => {
   try {
     const key = CryptoJS.enc.Utf8.parse(NOTES_AES_SECRET_KEY);
@@ -83,30 +83,33 @@ const ThirdYearNotes: React.FC = () => {
     setModalStep(2);
   };
 
-  // Step 2: Enter Subject Details for the new branch
+  // Step 2: Enter Subject Details for the new branch (including "By")
   const onFinishStep2 = async (values: any) => {
-    const { pdf, sub_code, sub_name } = values;
-    if (!pdf || !sub_code || !sub_name) {
+    const { pdf, sub_code, sub_name, by } = values;
+    if (!pdf || !sub_code || !sub_name || !by) {
       message.error('Please fill all the required fields.');
       return;
     }
     const current = new Date();
     const dateStr = current.toLocaleDateString();
-    // Encrypt the PDF link before saving
+    // Encrypt the fields before saving
     const encryptedPdf = encryptAES(pdf);
+    const encryptedSubCode = encryptAES(sub_code);
+    const encryptedSubName = encryptAES(sub_name);
+    const encryptedBy = encryptAES(by);
     // The path for the new subject will be: version12/Materials/Notes/Third_Year/<newBranchName>
     const branchPath = `version12/Materials/Notes/Third_Year/${newBranchName}`;
     const newSubjectRef = push(dbRef(db, branchPath));
     const newSubjectId = newSubjectRef.key;
     const subjectData = {
-      by: 'admin',
+      by: encryptedBy,
       date: dateStr,
       dislikes: 0,
       likes: 0,
       id: newSubjectId,
       pdf: encryptedPdf,
-      sub_code,
-      sub_name,
+      sub_code: encryptedSubCode,
+      sub_name: encryptedSubName,
     };
 
     try {
@@ -139,27 +142,30 @@ const ThirdYearNotes: React.FC = () => {
       message.error('No branch selected.');
       return;
     }
-    const { pdf, sub_code, sub_name } = values;
-    if (!pdf || !sub_code || !sub_name) {
+    const { pdf, sub_code, sub_name, by } = values;
+    if (!pdf || !sub_code || !sub_name || !by) {
       message.error('Please fill in all fields.');
       return;
     }
     const current = new Date();
     const dateStr = current.toLocaleDateString();
-    // Encrypt the PDF link before saving
+    // Encrypt the fields before saving
     const encryptedPdf = encryptAES(pdf);
+    const encryptedSubCode = encryptAES(sub_code);
+    const encryptedSubName = encryptAES(sub_name);
+    const encryptedBy = encryptAES(by);
     const branchPath = `version12/Materials/Notes/Third_Year/${selectedBranch}`;
     const newNoteRef = push(dbRef(db, branchPath));
     const newNoteId = newNoteRef.key;
     const noteData = {
-      by: 'admin',
+      by: encryptedBy,
       date: dateStr,
       dislikes: 0,
       likes: 0,
       id: newNoteId,
       pdf: encryptedPdf,
-      sub_code,
-      sub_name,
+      sub_code: encryptedSubCode,
+      sub_name: encryptedSubName,
     };
 
     try {
@@ -182,6 +188,7 @@ const ThirdYearNotes: React.FC = () => {
   return (
     <Layout style={{ minHeight: '70vh' }}>
       <Sider width={250} style={{ background: '#fff', paddingBottom: '24px' }}>
+<<<<<<< HEAD
         {loading ? (
           <Spin style={{ margin: '20px' }} />
         ) : (
@@ -218,6 +225,49 @@ const ThirdYearNotes: React.FC = () => {
               </p>
         </div>
           <Form form={subjectForm} layout="vertical" onFinish={onFinishSubject}>
+=======
+        {/* Sidebar code remains unchanged */}
+        {/* For brevity, assume the sidebar remains the same as in your current code */}
+        <Spin spinning={loading} style={{ margin: '20px' }}>
+          <Menu
+            mode="inline"
+            selectedKeys={[selectedBranch]}
+            onClick={handleMenuClick}
+            style={{ height: 'calc(100% - 50px)', borderRight: 0 }}
+          >
+            {branches.map((branchObj) => (
+              <Menu.Item key={branchObj.branch}>{branchObj.branch}</Menu.Item>
+            ))}
+          </Menu>
+          <Button
+            type="dashed"
+            style={{ width: '90%', margin: '10px' }}
+            onClick={() => {
+              setShowAddSubjectModal(true);
+              setModalStep(1);
+            }}
+          >
+            Add Subject
+          </Button>
+        </Spin>
+      </Sider>
+      <Layout style={{ padding: '24px' }}>
+        <Content style={{ background: '#fff', padding: 24, minHeight: 280 }}>
+          <h2>Add Subject Note to {selectedBranch}</h2>
+          <Form
+            form={subjectForm}
+            layout="vertical"
+            onFinish={onFinishSubject}
+            initialValues={{ by: 'Admin' }}
+          >
+            <Form.Item
+              label="By"
+              name="by"
+              rules={[{ required: true, message: 'Please enter the author name' }]}
+            >
+              <Input placeholder="Enter author name" />
+            </Form.Item>
+>>>>>>> upstream/main
             <Form.Item
               label="PDF Link"
               name="pdf"
@@ -275,7 +325,14 @@ const ThirdYearNotes: React.FC = () => {
           </Form>
         )}
         {modalStep === 2 && (
-          <Form form={subjectModalForm} layout="vertical" onFinish={onFinishStep2}>
+          <Form form={subjectModalForm} layout="vertical" onFinish={onFinishStep2} initialValues={{ by: 'Admin' }}>
+            <Form.Item
+              label="By"
+              name="by"
+              rules={[{ required: true, message: 'Please enter the author name' }]}
+            >
+              <Input placeholder="Enter author name" />
+            </Form.Item>
             <Form.Item
               label="PDF Link"
               name="pdf"
